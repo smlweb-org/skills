@@ -13,15 +13,17 @@ The normative spec is in `references/spec.md`. Read it when you need exact MUST/
 
 ## The contract in one table
 
-| Requirement | s | m | l |
+| Requirement | s (normative) | m (recommended) | l |
 |---|---|---|---|
-| Initial payload (HTML + render-blocking subresources) | ≤ 50 KB | ≤ 500 KB | open |
+| Initial payload (HTML + render-blocking subresources) | ≤ 50 KB | ≤ 1 MB | open |
 | Core content without JavaScript | MUST | SHOULD | MAY |
-| Third-party scripts | MUST NOT | ≤ 5 hosts | open |
+| Third-party scripts | MUST NOT | keep few | open |
 | Custom fonts | SHOULD NOT | MAY | MAY |
 | Round trips before core content | ≤ 2 | ≤ 5 | open |
 | Machine-readable summary (meta description / JSON-LD) | MUST | SHOULD | SHOULD |
 | End-to-end TLS | MUST | MUST | MUST |
+
+Only `s` budgets are normative — the standard's center of gravity. `m` values are recommendations; `l` is unconstrained. Content equivalence and TLS bind every profile.
 
 The S representation MUST contain, in the initial server response: the canonical title, a summary, the primary content or current state, and **every critical action** (the operations a user must be able to perform — check in, pay, mark safe, submit). A page whose S profile can't perform a critical action available in L is non-conforming. This is the rule that matters most: it's what keeps S from becoming a second-class page.
 

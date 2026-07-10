@@ -1,4 +1,4 @@
-# S—ML Web Profile 0.1 (Draft Specification)
+# S—ML Web Profile 0.4 (Draft Specification)
 
 *Status: draft for community review. This is the normative specification, maintained independently of the S—ML position paper. Header names, thresholds, and syntax are provisional. The key words MUST, MUST NOT, SHOULD, and MAY are to be interpreted as described in RFC 2119.*
 
@@ -58,17 +58,19 @@ It SHOULD: avoid custom fonts; keep images optional or heavily compressed; be ca
 
 ## A.5 Budgets (provisional)
 
-| Requirement | s | m | l |
+**Normative budgets exist only for `s`.** The Sparse profile is this standard's center of gravity and the only profile whose weight is a conformance requirement. The `m` column records *recommendations* — a disciplined target for the everyday experience, not a conformance gate. `l` is unconstrained by design: Luxe is where publishers do whatever they want. The only requirements that bind every profile are content equivalence (A.6) and end-to-end TLS.
+
+| Requirement | s (normative) | m (recommended) | l |
 |---|---|---|---|
-| Initial payload (HTML + render-blocking subresources) | ≤ 50 KB | ≤ 500 KB | open |
+| Initial payload (HTML + render-blocking subresources) | ≤ 50 KB | ≤ 1 MB | open |
 | Core content without JS | MUST | SHOULD | MAY |
-| Third-party scripts | MUST NOT | ≤ 5 hosts | open |
+| Third-party scripts | MUST NOT | keep few | open |
 | Custom fonts | SHOULD NOT | MAY | MAY |
 | Round trips before core content | ≤ 2 | ≤ 5 | open |
 | Machine-readable summary | MUST | SHOULD | SHOULD |
 | End-to-end TLS | MUST | MUST | MUST |
 
-Budget classes (`S-14`, `S-50`, `S-100`, `M-500`, `M-1000`) MAY be declared where a single threshold is too coarse; a declared class is auditable like any budget. `S-50` is the default Sparse class.
+Sparse budget classes (`S-14`, `S-50`, `S-100`) MAY be declared where a single threshold is too coarse; a declared class is auditable like any budget. `S-50` is the default Sparse class. A publisher MAY additionally declare an `m` class (`M-500`, `M-1000`) to make the recommendation binding for its own pages; absent such a declaration, tooling MUST report `m` deviations as advisories, never failures.
 
 ## A.6 Content equivalence
 
@@ -80,7 +82,7 @@ The `s` representation MAY serve as the wire format from which `m` and `l` are h
 
 ## A.8 Conformance
 
-A representation conforms to a profile if it meets every MUST and its budgets. Claims are made via `Content-Profile` and are auditable by tools (see `sml-audit`). Tools SHOULD report MUST violations as failures and SHOULD violations as warnings.
+A representation conforms to a profile if it meets every MUST and its normative budgets. In practice this means `s` conformance is strict (budgets and requirements), while `m` and `l` conformance reduces to content equivalence, TLS, and any budget class the publisher has voluntarily declared. Claims are made via `Content-Profile` and are auditable by tools (see `sml-audit`). Tools SHOULD report MUST violations as failures and SHOULD violations and recommendations as warnings.
 
 ## A.9 Security and privacy considerations
 

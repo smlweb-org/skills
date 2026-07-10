@@ -29,7 +29,7 @@ const BUDGETS = {
   },
   m: {
     label: 'M — Medium',
-    initialPayload: 500 * 1024,
+    initialPayload: 1024 * 1024,
     coreWithoutJs: 'recommended',
     thirdPartyScripts: 5,
     customFonts: true,
@@ -87,7 +87,7 @@ function color(enabled) {
 
 async function fetchBytes(url, headers = {}) {
   const res = await fetch(url, {
-    headers: { 'user-agent': 'sml-audit/0.1 (+https://github.com/sml-web)', ...headers },
+    headers: { 'user-agent': 'sml-audit/0.4 (+https://github.com/smlweb-org/sml-audit)', ...headers },
     redirect: 'follow',
   });
   const buf = Buffer.from(await res.arrayBuffer());
@@ -247,26 +247,30 @@ function gradeAll(f) {
   for (const [key, b] of Object.entries(BUDGETS)) {
     const fails = [];
     const warns = [];
+    // Spec A.5: normative budgets exist only for `s`. Medium deviations are
+    // advisories (warnings), Luxe is unconstrained. TLS binds every profile.
+    const strict = key === 's';
+    const flag = (msg) => (strict ? fails : warns).push(msg);
 
     if (!f.https) fails.push('Not served over HTTPS (end-to-end TLS required for every profile)');
 
     if (f.initialPayload > b.initialPayload) {
-      fails.push(`Initial payload ${kb(f.initialPayload)} exceeds budget ${kb(b.initialPayload)}`);
+      flag(`Initial payload ${kb(f.initialPayload)} exceeds ${strict ? 'budget' : 'recommended'} ${kb(b.initialPayload)}`);
     }
     if (f.jsRequired) {
       const msg = f.emptyAppRoot
         ? 'Core content unavailable without JavaScript (empty application shell)'
         : 'Core content likely unavailable without JavaScript (little visible text, external scripts present)';
-      if (b.coreWithoutJs === 'required') fails.push(msg);
+      if (b.coreWithoutJs === 'required') flag(msg);
       else if (b.coreWithoutJs === 'recommended') warns.push(msg);
     }
     const tp = f.scripts.thirdPartyHosts.length;
     if (tp > b.thirdPartyScripts) {
-      fails.push(`${tp} third-party script host(s) (${f.scripts.thirdPartyHosts.join(', ')}), budget: ${b.thirdPartyScripts === 0 ? 'none' : b.thirdPartyScripts}`);
+      flag(`${tp} third-party script host(s) (${f.scripts.thirdPartyHosts.join(', ')}), ${strict ? 'budget' : 'recommended'}: ${b.thirdPartyScripts === 0 ? 'none' : b.thirdPartyScripts}`);
     }
-    if (f.customFonts && !b.customFonts) fails.push('Custom fonts present (avoid for this profile)');
+    if (f.customFonts && !b.customFonts) flag('Custom fonts present (avoid for this profile)');
     if (f.roundTrips > b.roundTrips) {
-      fails.push(`Estimated ${f.roundTrips} round trips before core content, budget: ${b.roundTrips}`);
+      flag(`Estimated ${f.roundTrips} round trips before core content, ${strict ? 'budget' : 'recommended'}: ${b.roundTrips}`);
     }
     if (!f.machineSummary) {
       const msg = 'Missing machine-readable summary (meta description or JSON-LD)';
@@ -311,7 +315,7 @@ function report(result, opts) {
     lines.push('');
   }
 
-  lines.push(c.dim(`Audited in ${facts.elapsedMs} ms · sml-audit 0.1 (prototype: static analysis, no headless browser)`));
+  lines.push(c.dim(`Audited in ${facts.elapsedMs} ms · sml-audit 0.4 (prototype: static analysis, no headless browser)`));
   return { text: lines.join('\n'), allPass };
 }
 
